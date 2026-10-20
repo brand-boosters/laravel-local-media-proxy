@@ -1,0 +1,41 @@
+{
+    "name": "brandboosters/laravel-local-media-proxy",
+    "description": "Use the Local Media Proxy local proxy from Laravel: read production assets, keep every write local.",
+    "type": "library",
+    "license": "proprietary",
+    "keywords": ["laravel", "s3", "vapor", "flysystem", "local-development"],
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+        "illuminate/filesystem": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+        "illuminate/console": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+        "league/flysystem-aws-s3-v3": "^3.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^9.0 || ^10.0",
+        "phpunit/phpunit": "^11.0",
+        "spatie/laravel-medialibrary": "^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "LocalMediaProxy\\Laravel\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "LocalMediaProxy\\Laravel\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "LocalMediaProxy\\Laravel\\LocalMediaProxyServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
