@@ -42,22 +42,34 @@ class LocalMediaProxyServiceProvider extends ServiceProvider
         $this->publishes([__DIR__.'/../config/local-media-proxy.php' => config_path('local-media-proxy.php')], 'local-media-proxy-config');
         $this->repointConfig();
 
+        // The drivers are method references, not anonymous closures: Laravel 13 rebinds anonymous extend()
+        // callbacks to the filesystem manager, so $this inside them would no longer be this provider.
         // Explicit driver: 'my-disk' => ['driver' => 'local-media-proxy'] in config/filesystems.php.
         // 's3-overlay' is the driver name from before the rename.
         foreach (['local-media-proxy', 's3-overlay'] as $driver) {
-            Storage::extend($driver, function ($app, array $config) {
-                $overlay = $app->make(OverlayConfig::class);
-                $overlay->assertSafe();
-
-                return $this->createChecked($overlay->diskConfig($config));
-            });
+            Storage::extend($driver, $this->createProxyDriver(...));
         }
 
-        Storage::extend('s3', fn ($app, array $config) => $this->createS3Disk($config));
+        Storage::extend('s3', $this->createS3Driver(...));
 
         if ($this->app->runningInConsole()) {
             $this->commands([StatusCommand::class]);
         }
+    }
+
+    /** The 'local-media-proxy' (and old 's3-overlay') driver: always through the proxy. */
+    private function createProxyDriver($app, array $config)
+    {
+        $overlay = $app->make(OverlayConfig::class);
+        $overlay->assertSafe();
+
+        return $this->createChecked($overlay->diskConfig($config));
+    }
+
+    /** The 's3' driver: through the proxy when enabled for the disk, refused or real S3 otherwise. */
+    private function createS3Driver($app, array $config)
+    {
+        return $this->createS3Disk($config);
     }
 
     private function createS3Disk(array $config)
